@@ -10,23 +10,28 @@
 #  updated_at      :datetime         not null
 #
 class User < ApplicationRecord
-  validates :username, :password_digest, :session_token, presence: true
-  validates :username, :session_token, uniqueness: { case_sensitive: true }
-  validates :password, length: { minimum: 6, allow_nil: true }
+    before_validation :ensure_session_token
+    validates :username, :password_digest, :session_token, presence: true
+    validates :username, :session_token, uniqueness: { case_sensitive: true }
+    validates :password, length: { minimum: 6, allow_nil: true }
 
-  attr_reader :password
+    attr_reader :password
 
-  def self.generate_session_token
-    token = SecureRandom::urlsafe_base64
-    while User.exists?(session_token: token)
-      token = SecureRandom::urlsafe_base64
+    def password=(password)
+        @password = password
+        self.password_digest = BCrypt::Password.create(password)
     end
-    token
-  end
 
-  def password=(password)
-    @password = password
-    self.password_digest = BCrypt::Password.create(password)
-  end
+    def ensure_session_token
+        self.session_token ||= generate_session_token
+    end
+  
+    def generate_session_token
+        token = SecureRandom::urlsafe_base64
+        while User.exists?(session_token: token)
+            token = SecureRandom::urlsafe_base64
+        end
+        token
+    end
 
 end
