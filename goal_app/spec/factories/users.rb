@@ -10,9 +10,11 @@
 #  updated_at      :datetime         not null
 #
 FactoryBot.define do
+
   factory :user do
-    username { "MyString" }
-    password_digest { "MyString" }
-    session_token { "MyString" }
+    username { 'amin' }
+    # password { '123456' }
+    password_digest { BCrypt::Password.create('123456') }
+    session_token { SecureRandom::urlsafe_base64 }
   end
 end
